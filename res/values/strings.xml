@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Rezune_2</string>
+		<string name="app_name">Rezune_2</string>
+		<string name="sd_empty">No songs found on SD card</string>
+		<string name="npsong">Now Playing</string>
+		<string name="album_div"> - </string>
+</resources>

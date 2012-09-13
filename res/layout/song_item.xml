@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+ 
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/title"
+        android:textSize="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+	    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	        android:id="@+id/artist"
+	        android:textSize="10dp"
+	        android:textColor="#999"
+	        android:layout_width="wrap_content"
+	        android:layout_height="match_parent"/>
+	    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	        android:id="@+id/temp_div"
+	        android:text="@string/album_div"
+	        android:textSize="10dp"
+	        android:textColor="#999"
+	        android:layout_width="wrap_content"
+	        android:layout_height="match_parent"/>
+	    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	        android:id="@+id/album"
+	        android:textSize="10dp"
+	        android:textColor="#999"
+	        android:layout_width="wrap_content"
+	        android:layout_height="match_parent"/>
+	  </LinearLayout>
+   
+ </LinearLayout>
