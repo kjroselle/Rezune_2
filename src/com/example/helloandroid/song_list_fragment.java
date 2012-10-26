@@ -1,11 +1,10 @@
 package com.example.helloandroid;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.ListFragment;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -15,11 +14,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.app.LoaderManager;
 
 //class Mp3Filter implements FilenameFilter 
@@ -31,19 +32,13 @@ import android.app.LoaderManager;
 //}
 
 public class song_list_fragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
-	private static final String MEDIA_PATH = new String("/mnt/sdcard/Music/");
-	private List<String> songs = new ArrayList<String>();
+//	private List<String> songs = new ArrayList<String>();
 	private static final int SONG_LIST_LOADER = 0x01;
 	private SimpleCursorAdapter adapter;
-//	***
-//	Some junk
-	Cursor music_cursor;
-	private int music_count;
-	private int music_column_index;
-//	***
-	private MediaPlayer mp = new MediaPlayer();
-	private int currentPosition = -1;
-	private long cur_song_id;
+	private songListListener mSongListListener;
+	Cursor musicCursor;
+	private MediaPlayer mp;
+	private int currentPosition = 0;
 	private enum repeat_enum {
 		R_NONE, R_ONE, R_ALL
 	};
@@ -51,9 +46,17 @@ public class song_list_fragment extends ListFragment implements LoaderManager.Lo
 	private repeat_enum repeat_opt = repeat_enum.R_ALL;
 	
 	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		Log.d("KJ_LOG", "song_list_fragment: onCreateView()");
+		View view = inflater.inflate(R.layout.song_list_fragment, container, false);
+		return view;
+	}
+	
+	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		mp = new MediaPlayer();
 		String[] uiBindFrom = { MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM};
         int[] uiBindTo = { R.id.title, R.id.artist, R.id.album};
 
@@ -68,8 +71,41 @@ public class song_list_fragment extends ListFragment implements LoaderManager.Lo
 //		updateSongList();
 	}
 	
-	public interface onSongSelectListener {
-		public void onSongSelect(Uri songUri);
+	public interface songListListener {
+//		public void onSongSelect(Uri songUri);
+//		public void onSongSelect(int position);
+		public void playingSong(boolean playing);
+	}
+	
+	@Override
+	public void onPause() {
+		Log.d("KJ_LOG", "song_list_fragment: onPause()");
+//		releasePlayer();
+		mSongListListener.playingSong(false);
+		if(mp.isPlaying()) {
+			mp.pause();
+		}
+//		musicCursor.close();
+		super.onPause();
+	}
+	
+	@Override
+	public void onResume() {
+//		getLoaderManager().initLoader(SONG_LIST_LOADER, null, this);
+		Log.d("KJ_LOG", "song_list_fragment: onResume()");
+		super.onResume();
+	}
+	
+	@Override
+	public void onStop() {
+		Log.d("KJ_LOG", "song_list_fragment: onStop()");
+		super.onStop();
+	}
+	
+	@Override
+	public void onDestroy() {
+		Log.d("KJ_LOG", "song_list_fragment: onDestroy()");
+		super.onDestroy();
 	}
 	
 	@Override
@@ -80,55 +116,32 @@ public class song_list_fragment extends ListFragment implements LoaderManager.Lo
 		if(currentPosition == position) {
     		pauseResumeSong();
     	} else {
+    		// set now playing
+//    		String np_title = (String)((TextView)(v.findViewById(R.id.title))).getText().toString();
+//    		TextView text = (TextView) getActivity().findViewById(R.id.npitem);
+//    		text.setText(np_title);
 			currentPosition = position;
 			playSong(id);
     	}
-//    	if(currentPosition == position) {
-//    		pauseResumeSong();
-//    	} else {
-//			currentPosition = position;
-//			playSong(songs.get(position));
-//    	}
 	}
 	
-	public void updateSongList() {
-        File music_dir = new File(MEDIA_PATH);
-        if (music_dir.exists()) {
-	        if (music_dir.listFiles(new Mp3Filter()).length > 0) {
-                for (File file : music_dir.listFiles(new Mp3Filter())) {
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                    songs.add(file.getName());
-                }
-//                setListAdapter(ArrayAdapter.createFromResource(getActivity()
-//                        .getApplicationContext(), songs,
-//                        R.layout.song_item));
-                ArrayAdapter<String> songList = new ArrayAdapter<String>(getActivity().getApplicationContext(),
-                      R.layout.song_item, 
-                      songs);
-                setListAdapter(songList);
-	        }
-        }
-    }
+	private void releasePlayer() {
+		mp.release();
+	}
     
     // pauses mp if a song is playing, otherwise resumes
-    private void pauseResumeSong() {
+    public void pauseResumeSong() {
 	    	if(mp.isPlaying()) {
+	    		// tell activity we are not playing a song now
+	    		mSongListListener.playingSong(false);
 	    		try {
 	    			mp.pause();
 		    	} catch (IllegalStateException e) {
 		            Log.v(getString(R.string.app_name), e.getMessage());
 		    	}
 	    	} else {
+	    		// tell activity we are playing a song now
+	    		mSongListListener.playingSong(true);
 	    		try {
 	    			mp.start();
 		    	} catch (IllegalStateException e) {
@@ -137,16 +150,33 @@ public class song_list_fragment extends ListFragment implements LoaderManager.Lo
 	    	}
     	
     }
+    
     private void playSong(long id) {
     	String songUri;
     	String proj[] = { MediaStore.Audio.Media.DATA };
+    	Log.d("KJ_LOG", "songid: " + id);
+    	mSongListListener.playingSong(true);
         Cursor songCursor = getActivity().getContentResolver().query(
                 Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         String.valueOf(id)), proj, null, null, null);
         if (songCursor.moveToFirst()) {
             songUri = songCursor.getString(0);
             Log.d("KJ_LOG", "songUri: " + songUri);
-//            tutSelectedListener.onTutSelected(tutorialUrl);
+            
+	        // set now playing
+            Cursor temp_c = (Cursor)adapter.getItem(currentPosition);
+            String np_title = temp_c.getString(temp_c.getColumnIndex("title"));
+            TextView text = (TextView) getActivity().findViewById(R.id.npitem);
+            if(text != null)
+            	text.setText(np_title);
+            
+            // get URI for song
+            String tUri = temp_c.getString(1);
+            
+//	        View v = (View)adapter.getItem(currentPosition);
+//	        String np_title = (String)((TextView)(v.findViewById(R.id.title))).getText().toString();
+//			TextView text = (TextView) getActivity().findViewById(R.id.npitem);
+//			text.setText(np_title);
             try {
         		mp.reset();
         		mp.setDataSource(songUri);
@@ -159,30 +189,15 @@ public class song_list_fragment extends ListFragment implements LoaderManager.Lo
     					
     				}
     			});
+
         	} catch (IOException e) {
                 Log.v(getString(R.string.app_name), e.getMessage());
         	}
         }
         songCursor.close();
     }
-    private void playSong(String song_path) {
-    	try {
-    		mp.reset();
-    		mp.setDataSource(song_path);
-    		mp.prepare();
-    		mp.start();
-    		mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-				
-				public void onCompletion(MediaPlayer mp) {
-					nextSong();
-					
-				}
-			});
-    	} catch (IOException e) {
-            Log.v(getString(R.string.app_name), e.getMessage());
-    	}
-    }
-    private void nextSong() {
+    
+    public void nextSong() {
     	if (repeat_opt == repeat_enum.R_ONE) {
     		// keep playing the same song...
     		playSong(adapter.getItemId(currentPosition));
@@ -195,10 +210,46 @@ public class song_list_fragment extends ListFragment implements LoaderManager.Lo
         		playSong(adapter.getItemId(currentPosition));
             }
         } else {
-	        // Play next song*
+	        // Play next song
 	        playSong(adapter.getItemId(currentPosition));
         }
     }
+    
+    public void forceNextSong() {
+    	if (++currentPosition >= adapter.getCount()) {
+            // Last song, reset position to start
+            currentPosition = 0;
+        	playSong(adapter.getItemId(currentPosition));
+        } else {
+	        // Play next song
+	        playSong(adapter.getItemId(currentPosition));
+        }
+    }
+    
+    public void prevSong() {
+    	if (--currentPosition < 0) {
+            // Last song, reset position to start
+            currentPosition = adapter.getCount()-1;
+        	playSong(adapter.getItemId(currentPosition));
+        } else {
+	        // Play prev song
+	        playSong(adapter.getItemId(currentPosition));
+        }
+    }
+    
+    @Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+	     
+	// This makes sure that the container activity has implemented
+	// the callback interface. If not, it throws an exception
+		try {
+		mSongListListener = (songListListener) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString()
+				+ " must implement songListListener");
+		}
+	}
     
 // LoaderManager.LoaderCallbacks<Cursor> methods:
     
@@ -219,6 +270,7 @@ public class song_list_fragment extends ListFragment implements LoaderManager.Lo
  
 //    @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+    	musicCursor = cursor;
     	if(cursor != null)
         {
         	while(cursor.moveToNext())
@@ -232,6 +284,29 @@ public class song_list_fragment extends ListFragment implements LoaderManager.Lo
         	}
         }
     	adapter.swapCursor(cursor);
+    	Cursor temp_c = (Cursor)adapter.getItem(0);
+        
+        // get URI for song
+        String tUri = temp_c.getString(1);
+    	try {
+    		String np_title = temp_c.getString(temp_c.getColumnIndex("title"));
+            TextView text = (TextView) getActivity().findViewById(R.id.npitem);
+            if(text != null)
+            	text.setText(np_title);
+    		mp.reset();
+    		mp.setDataSource(tUri);
+    		mp.prepare();
+    		mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+				
+				public void onCompletion(MediaPlayer mp) {
+					nextSong();
+					
+				}
+			});
+
+    	} catch (IOException e) {
+            Log.v(getString(R.string.app_name), e.getMessage());
+    	}
     }
  
 //    @Override

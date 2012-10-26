@@ -1,14 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:background="@drawable/npborder">
     <TextView
         android:id="@+id/npitem"
- 				android:textSize="30dp"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="57sp"
+        android:layout_weight="1"
         android:text="@string/npsong"
-    />
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:focusable="true" android:focusableInTouchMode="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        
+        android:scrollHorizontally="true"
+        android:textSize="35sp" />
+
+    <ImageButton
+        android:id="@+id/npprev"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="0"
+        android:background="#0FFF"
+        android:src="@drawable/btn_prev" />
+
+    <ToggleButton
+        android:id="@+id/npplay"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="0"
+        android:background="@drawable/tbtn_play"
+        android:textOff=""
+        android:textOn="" />
+
+    <ImageButton
+        android:id="@+id/npnext"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="0"
+        android:background="#0FFF"
+        android:src="@drawable/btn_next" />
 
 </LinearLayout>
