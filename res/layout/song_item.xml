@@ -18,6 +18,7 @@
 	        android:id="@+id/artist"
 	        android:textSize="10dp"
 	        android:textColor="#999"
+	        android:singleLine="true"
 	        android:layout_width="wrap_content"
 	        android:layout_height="match_parent"/>
 	    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -31,6 +32,7 @@
 	        android:id="@+id/album"
 	        android:textSize="10dp"
 	        android:textColor="#999"
+	        android:singleLine="true"
 	        android:layout_width="wrap_content"
 	        android:layout_height="match_parent"/>
 	  </LinearLayout>
